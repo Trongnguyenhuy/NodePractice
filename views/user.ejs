@@ -7,8 +7,8 @@
   <body>
     <h1>List User:</h1>
     <ul>
-      <% users.forEach(user =>{%>
-        <li><%= user %></li>
+      <% users.forEach((user, index) =>{%>
+        <li><a href="/users/<%= index %>"><%= user %></a></li>
       <% }); %>
     </ul>
   </body>

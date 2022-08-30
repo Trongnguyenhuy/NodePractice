@@ -12,10 +12,30 @@ app.use(bodyParser.urlencoded({
 
 const users = ["An", "Binh", "Cuong"];
 
+app.get('/input', (req, res, next) => {
+  return res.render('input',{
+    pageTitle: "Input Users"
+  });
+});
+
+app.post('/input', (req, res, next) => {
+  const name = req.body.name;
+  users.push(name);
+  return res.redirect('/users');
+});
+
 app.get('/users', (req, res, next) => {
   return res.render('user',{
     pageTitle: "List Users",
     users: users
+  });
+});
+
+app.get('/users/:id', (req, res, next) => {
+  const id = req.params.id;
+  return res.render('user-detail', {
+    pageTitle: "List Users",
+    user: users[id]
   });
 });
 
