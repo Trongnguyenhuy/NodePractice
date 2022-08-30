@@ -1,9 +1,25 @@
 const express = require('express');
-const path = require('path');
+const bodyParser = require('body-parser');
 
 const app = express();
 
-app.use("/", (req, res, next) => {
+app.set('view engine', 'ejs');
+app.set('views', 'views');
+
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
+
+const users = ["An", "Binh", "Cuong"];
+
+app.get('/users', (req, res, next) => {
+  return res.render('user',{
+    pageTitle: "List Users",
+    users: users
+  });
+});
+
+app.get("/", (req, res, next) => {
   res.setHeader('Content-Type', 'text/html');
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
