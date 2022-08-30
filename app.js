@@ -1,9 +1,11 @@
 const express = require('express');
+const path = require('path');
 
 const app = express();
 
-app.use("/", (req,res,next) => {
-  res.send("<h1>Hello world from new server!</h1>")
+app.use("/", (req, res, next) => {
+  res.setHeader('Content-Type', 'text/html');
+  res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
 app.listen(3000, () => {
