@@ -7,6 +7,8 @@ const URI =
   "mongodb+srv://trongnguyenhuy:jj6arv15@cluster0.qyzg5.mongodb.net/practices";
 const User = require("./models/users");
 
+const { body, validationResult } = require("express-validator");
+
 const app = express();
 
 app.set("view engine", "ejs");
@@ -26,22 +28,33 @@ app.get("/input", (req, res, next) => {
   });
 });
 
-app.post("/input", (req, res, next) => {
-  const name = req.body.name;
-  const password = 123;
-  const user = new User({
-    name: name,
-    password: password,
-  });
-  return user
-    .save()
-    .then((result) => {
-      return res.redirect("/users");
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
+app.post(
+  "/input",
+  body("name", "Min length as least 5 characters").isLength({ min: 5 }),
+  (req, res, next) => {
+    const error = validationResult(req);
+    const name = req.body.name;
+    const password = 123;
+    console.log(error);
+    if (!error.isEmpty()) {
+      console.log(error);
+      return res.redirect("/input");
+    } else {
+      const user = new User({
+        name: name,
+        password: password,
+      });
+      return user
+        .save()
+        .then((result) => {
+          return res.redirect("/users");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+  }
+);
 
 app.get("/users", (req, res, next) => {
   User.find()
