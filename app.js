@@ -1,5 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
+
+const database = require('./util/database');
 
 const app = express();
 
@@ -10,22 +13,31 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-const users = ["An", "Binh", "Cuong"];
+let users;
+
+database.execute("SELECT * FROM users")
+  .then(result => {
+    users = result[0];
+  });
 
 app.get('/input', (req, res, next) => {
-  return res.render('input',{
+  return res.render('input', {
     pageTitle: "Input Users"
   });
 });
 
 app.post('/input', (req, res, next) => {
   const name = req.body.name;
-  users.push(name);
-  return res.redirect('/users');
+  const password = 123;
+  database.execute("INSERT INTO users (name, password)" + "VALUES(?,?)", [name, password])
+  .then(result => {
+    console.log(result);
+    return res.redirect("/users");
+  });
 });
 
 app.get('/users', (req, res, next) => {
-  return res.render('user',{
+  return res.render('user', {
     pageTitle: "List Users",
     users: users
   });
@@ -40,6 +52,7 @@ app.get('/users/:id', (req, res, next) => {
 });
 
 app.get("/", (req, res, next) => {
+
   res.setHeader('Content-Type', 'text/html');
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
