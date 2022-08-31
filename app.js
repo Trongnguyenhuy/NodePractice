@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const database = require('./util/database');
+const sequelize = require('./util/database');
+const Users = require('./models/users');
 
 const app = express();
 
@@ -15,11 +16,6 @@ app.use(bodyParser.urlencoded({
 
 let users;
 
-database.execute("SELECT * FROM users")
-  .then(result => {
-    users = result[0];
-  });
-
 app.get('/input', (req, res, next) => {
   return res.render('input', {
     pageTitle: "Input Users"
@@ -29,18 +25,30 @@ app.get('/input', (req, res, next) => {
 app.post('/input', (req, res, next) => {
   const name = req.body.name;
   const password = 123;
-  database.execute("INSERT INTO users (name, password)" + "VALUES(?,?)", [name, password])
-  .then(result => {
-    console.log(result);
-    return res.redirect("/users");
-  });
+  return Users.create({
+      name: name,
+      password: password
+    })
+    .then(result => {
+      console.log(result);
+      return res.redirect('/users');
+    })
+    .catch(err => {
+      console.log(err);
+    });
 });
 
 app.get('/users', (req, res, next) => {
-  return res.render('user', {
-    pageTitle: "List Users",
-    users: users
-  });
+  Users.findAll()
+  .then(users =>{
+    return res.render('user', {
+      pageTitle: "List Users",
+      users: users
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  })
 });
 
 app.get('/users/:id', (req, res, next) => {
@@ -52,11 +60,17 @@ app.get('/users/:id', (req, res, next) => {
 });
 
 app.get("/", (req, res, next) => {
-
   res.setHeader('Content-Type', 'text/html');
   res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
-app.listen(3000, () => {
-  console.log("Server listening on port 3000");
-});
+
+sequelize.sync()
+  .then(results => {
+    app.listen(3000, () => {
+      console.log("Server listening on port 3000");
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  });
